@@ -13,3 +13,18 @@ Class project for Media and Cognition 2023 Fall
 - rx：yz面，上为0，屏幕前往后看顺时针
 - ry：xz面，下为0，从左往右看逆时针
 - rz：xy面，远离屏幕为0，从上向下看逆时针
+
+### CLIP
+
+接口函数 `ImageTextMatch`，计算传入的每张图片与文本串的匹配概率。使用例见 `main.py`。
+
+- 环境配置
+
+  [openai/CLIP: CLIP (Contrastive Language-Image Pretraining), Predict the most relevant text snippet given an image (github.com)](https://github.com/openai/CLIP#modelencode_texttext-tensor)
+
+  ```
+  conda install --yes -c pytorch pytorch=1.7.1 torchvision cudatoolkit=11.0
+  pip install ftfy regex tqdm
+  pip install git+https://github.com/openai/CLIP.git
+  ```
+
