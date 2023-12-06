@@ -12,6 +12,8 @@ NEAR_PIXEL = 256
 FAR_PIXEL = 0
 
 MODE = 0
+DEFAULT_SPEED = 40
+TARGET_DELTA = 20
 
 POSITION = {
     "left-near":
@@ -28,6 +30,10 @@ POSITION = {
          [220, -140, 220, -150, -10, -80]],  # down
 }
 
+ANGLE = {
+    "down": [180, 0, 180],
+}
+
 mc = MyCobot('COM3', 115200)
 
 
@@ -38,6 +44,9 @@ def cmp(pos, target):
     delta_y = abs(pos[1] - target[1])
     delta_z = abs(pos[2] - target[2])
     delta = (delta_x ** 2 + delta_y ** 2 + delta_z ** 2) ** 0.5
+    print("Position:", pos)
+    print("Delta:", delta)
+    print("-------------------------")
     return delta
 
 
@@ -45,14 +54,14 @@ def move(x, y, z, *args, **kwargs):
     if len(args) > 0:
         coords = [x, y, z, *args]
     else:
-        coords = [x, y, z, 180, 0, 180]
+        coords = [x, y, z, *ANGLE["down"]]
     if "speed" in kwargs:
         speed = kwargs["speed"]
     else:
-        speed = 40
+        speed = DEFAULT_SPEED
     mc.send_coords(coords, speed, MODE)
     start = time.time()
-    while cmp(mc.get_coords(), (x, y, z)) > 20:
+    while cmp(mc.get_coords(), (x, y, z)) > TARGET_DELTA:
         if cmp(mc.get_coords(), (x, y, z)) == 999:
             time.sleep(2)
             break
@@ -86,7 +95,6 @@ def init():
 def pixel_to_coord(pixel_x, pixel_y):
     x = FAR_BORDER - (pixel_x - FAR_PIXEL) / (NEAR_PIXEL - FAR_PIXEL) * (FAR_BORDER - NEAR_BORDER)
     y = LEFT_BORDER - (pixel_y - LEFT_PIXEL) / (RIGHT_PIXEL - LEFT_PIXEL) * (LEFT_BORDER - RIGHT_BORDER)
-    print(x, y)
     return x, y
 
 
@@ -95,7 +103,7 @@ def grasp(pos):
     move(pos[0], pos[1], BOX_LEVEL + 30)
     move(pos[0], pos[1], BOX_LEVEL, speed=10)
     pump_on()
-    move(pos[0], pos[1], BOX_LEVEL + 30, speed=10)
+    move(pos[0], pos[1], BOX_LEVEL + 150)
     return
 
 
