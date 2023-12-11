@@ -1,6 +1,6 @@
 from match import arrayToImage, imageTextMatch, classify
 from proposal import capture, propose
-from robot import init, pixel_to_coord, grasp, put_off
+from robot import init, grasp, put_off
 from matplotlib import pyplot as plt
 
 PROMPT_SET = [
@@ -37,5 +37,5 @@ if __name__ == '__main__':
     for i in range(3):
         prompt = PROMPT_SET[i]
         index = category.index(prompt)
-        grasp(pixel_to_coord(regions[index]["x"], regions[index]["y"]))
+        grasp(regions[index]["x"], regions[index]["y"])
         put_off("left-near")

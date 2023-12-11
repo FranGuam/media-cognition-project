@@ -1,12 +1,12 @@
 from pymycobot.mycobot import MyCobot
 import time
 
-# LEFT_BORDER = 75
-# RIGHT_BORDER = -35
-# NEAR_BORDER = 135
-# FAR_BORDER = 215
+# LEFT = 75
+# RIGHT = -35
+# NEAR = 135
+# FAR = 215
 
-# BOX_LEVEL = 85
+# BOX_LEVEL = 105
 BOX_LEVEL = 90
 LEFT_BORDER = 90
 RIGHT_BORDER = -60
@@ -103,12 +103,13 @@ def pixel_to_coord(pixel_x, pixel_y):
     return x, y
 
 
-def grasp(pos):
+def grasp(pixel_x, pixel_y):
     init()
-    move(pos[0], pos[1], BOX_LEVEL + 30)
-    move(pos[0], pos[1], BOX_LEVEL, speed=10)
+    x, y = pixel_to_coord(pixel_x, pixel_y)
+    move(x, y, BOX_LEVEL + 30)
+    move(x, y, BOX_LEVEL, speed=10)
     pump_on()
-    move(pos[0], pos[1], BOX_LEVEL + 150)
+    move(x, y, BOX_LEVEL + 150)
     return
 
 
@@ -121,9 +122,6 @@ def put_off(label):
 
 
 if __name__ == "__main__":
-    # init()
-    # grasp(pixel_to_coord(0.5, 0.5))
-    # put_off("left-near")
-    pump_off()
-    print(mc.get_coords())
-
+    init()
+    grasp(0.5, 0.5)
+    put_off("left-near")
