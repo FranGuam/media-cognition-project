@@ -1,15 +1,41 @@
-from PIL import Image
-import numpy as np
-from ImageTextMatch import ImageTextMatch
+from match import arrayToImage, imageTextMatch, classify
+from proposal import capture, propose
+from robot import init, pixel_to_coord, grasp, put_off
+from matplotlib import pyplot as plt
 
-image = Image.open("CLIP.png")
-probs = ImageTextMatch([image], ["a diagram", "a dog", "a cat"])
-print("Label probs:", probs)
+PROMPT_SET = [
+    "an apple",
+    "a camera",
+    "a gun",
+    "a ball",
+    "a cat",
+]
 
-"""
-# 假设 img_np 是一个形状为(3, H, W)的numpy数组
-img_np = np.random.rand(3, 224, 224)
 
-# 将numpy数组转换为PIL图像对象
-img_pil = Image.fromarray((img_np * 255).astype(np.uint8).transpose(1, 2, 0))
-"""
+def vision_test():
+    image = capture()
+    regions = propose(image)
+    prompt = ["an apple", "a camera", "a gun"]
+    for region in regions:
+        img = arrayToImage(region["image"])
+        probs = imageTextMatch(img, prompt)
+        plt.imshow(img)
+        print("Center:", "X =", region["x"], ",", "Y =", region["y"])
+        print("Label probs:", probs)
+        plt.show()
+    return
+
+
+if __name__ == '__main__':
+    init()
+    image = capture()
+    regions = propose(image)
+    # vision_test()
+    img = list(map(lambda region: arrayToImage(region["image"]), regions))
+    category = classify(img, PROMPT_SET)
+    print(category)
+    for i in range(3):
+        prompt = PROMPT_SET[i]
+        index = category.index(prompt)
+        grasp(pixel_to_coord(regions[index]["x"], regions[index]["y"]))
+        put_off("left-near")

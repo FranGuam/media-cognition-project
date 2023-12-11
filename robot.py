@@ -1,15 +1,17 @@
 from pymycobot.mycobot import MyCobot
 import time
 
-BOX_LEVEL = 105
-LEFT_BORDER = 75
-RIGHT_BORDER = -35
-NEAR_BORDER = 135
-FAR_BORDER = 215
-LEFT_PIXEL = 0
-RIGHT_PIXEL = 256
-NEAR_PIXEL = 256
-FAR_PIXEL = 0
+# LEFT_BORDER = 75
+# RIGHT_BORDER = -35
+# NEAR_BORDER = 135
+# FAR_BORDER = 215
+
+# BOX_LEVEL = 85
+BOX_LEVEL = 90
+LEFT_BORDER = 90
+RIGHT_BORDER = -60
+NEAR_BORDER = 90
+FAR_BORDER = 230
 
 MODE = 0
 DEFAULT_SPEED = 40
@@ -51,6 +53,9 @@ def cmp(pos, target):
 
 
 def move(x, y, z, *args, **kwargs):
+    print("-------------------------")
+    print("Move to:", x, y, z)
+    print("-------------------------")
     if len(args) > 0:
         coords = [x, y, z, *args]
     else:
@@ -93,8 +98,8 @@ def init():
 
 
 def pixel_to_coord(pixel_x, pixel_y):
-    x = FAR_BORDER - (pixel_x - FAR_PIXEL) / (NEAR_PIXEL - FAR_PIXEL) * (FAR_BORDER - NEAR_BORDER)
-    y = LEFT_BORDER - (pixel_y - LEFT_PIXEL) / (RIGHT_PIXEL - LEFT_PIXEL) * (LEFT_BORDER - RIGHT_BORDER)
+    x = FAR_BORDER - pixel_y * (FAR_BORDER - NEAR_BORDER)
+    y = LEFT_BORDER - pixel_x * (LEFT_BORDER - RIGHT_BORDER)
     return x, y
 
 
@@ -116,7 +121,9 @@ def put_off(label):
 
 
 if __name__ == "__main__":
-    init()
-    # Take a picture
-    grasp(pixel_to_coord(128, 128))
-    put_off("left-near")
+    # init()
+    # grasp(pixel_to_coord(0.5, 0.5))
+    # put_off("left-near")
+    pump_off()
+    print(mc.get_coords())
+
