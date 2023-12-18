@@ -3,11 +3,8 @@ from proposal import capture, propose
 from robot import init, grasp, put_off
 from matplotlib import pyplot as plt
 
-prompt = "an apple"
 
-
-def vision_test():
-    image = capture()
+def vision_test(image):
     regions = propose(image)
     prompt = ["an apple", "a camera", "a gun"]
     for region in regions:
@@ -21,11 +18,17 @@ def vision_test():
 
 
 if __name__ == '__main__':
+    prompt = "an apple"
+    print("Start")
     init()
+    print("Capture")
     image = capture()
+    print("Vision test")
+    vision_test(image)
+    print("Propose")
     regions = propose(image)
-    # vision_test()
-    imgs = list(map(lambda region: arrayToImage(region["image"]), regions))
-    index = classify(prompt, imgs)
+    print("Classify")
+    images = list(map(lambda region: arrayToImage(region["image"]), regions))
+    index = classify(prompt, images)
     grasp(regions[index]["x"], regions[index]["y"])
     put_off("left-near")
