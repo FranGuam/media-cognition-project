@@ -1,16 +1,10 @@
 from match import arrayToImage, imageTextMatch, classify
 from proposal import capture, propose,crop
-from robot import init, pixel_to_coord, grasp, put_off
+# from robot import init, pixel_to_coord, grasp, put_off
 from matplotlib import pyplot as plt
 from yolo_proposal import *
 
-PROMPT_SET = [
-    "an apple",
-    "a camera",
-    "a gun",
-    "a ball",
-    "a cat",
-]
+prompt = "摄像机"
 
 
 def vision_test():
@@ -44,13 +38,5 @@ if __name__ == '__main__':
     for image in img:
         plt.imshow(image)
         plt.show()
-    category = classify(img, PROMPT_SET)
-    print(category)
-    for i in range(3):
-        prompt = PROMPT_SET[i]
-        index = category.index(prompt)
-        print(regions[index]["x"], regions[index]["y"])
-        a,b = pixel_to_coord(regions[index]["x"], regions[index]["y"])
-        print(a,b)
-        grasp(a,b)
-        put_off("left-near")
+    index = classify(prompt, img)
+    print(index)
