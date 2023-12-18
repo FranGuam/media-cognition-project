@@ -16,8 +16,6 @@ Class project for Media and Cognition 2023 Fall
 
 ### CLIP
 
-接口函数 `ImageTextMatch`，计算传入的每张图片与文本串的匹配概率。使用例见 `main.py`。
-
 - 环境配置
 
   [openai/CLIP: CLIP (Contrastive Language-Image Pretraining), Predict the most relevant text snippet given an image (github.com)](https://github.com/openai/CLIP#modelencode_texttext-tensor)
@@ -53,4 +51,4 @@ Class project for Media and Cognition 2023 Fall
   cn_clip
   ```
 
-  
+- 接口函数 `TextMatchImages`，计算给定的text与每张图片的匹配概率。
