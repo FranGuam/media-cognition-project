@@ -4,8 +4,6 @@ import torch
 import cn_clip.clip as clip
 from cn_clip.clip import load_from_name
 
-# CONFIDENCE = 0.75
-
 
 def arrayToImage(array: np.ndarray):
     return Image.fromarray(array)
@@ -27,7 +25,7 @@ def imageTextMatch(image: Image.Image, text: list[str]):
 
 def TextMatchImages(text: str, images: list[Image.Image]):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
+    print("Using", device)
     model, preprocess = load_from_name("ViT-B-16", device=device, download_root='./')
     model.eval()
     text = clip.tokenize([text]).to(device)
