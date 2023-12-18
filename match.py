@@ -23,6 +23,7 @@ def imageTextMatch(image: Image.Image, text: list[str]):
         probs = logits_per_image.softmax(dim=-1).cpu().numpy()
     return probs[0]
 
+
 def TextMatchImages(text: str, images: list[Image.Image]):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Using", device)
@@ -34,6 +35,7 @@ def TextMatchImages(text: str, images: list[Image.Image]):
         logits_per_image, logits_per_text = model.get_similarity(images, text)
         probs = logits_per_text.softmax(dim=-1).cpu().numpy()
     return probs[0]
+
 
 def classify(prompt: str, images: list[Image.Image]):
     probs = TextMatchImages(prompt, images)
