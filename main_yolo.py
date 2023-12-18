@@ -28,18 +28,29 @@ def vision_test():
 
 
 if __name__ == '__main__':
-    init()
+    # init()
     model = Detr(lr=2.5e-6, weight_decay=1e-5)
     model.load_state_dict(torch.load('parameters.pth'))         # Read the parameters prepared already
-    image = capture()
-    image = crop(image)
+    # image = capture()
+    image = cv2.imread("D:\code\media_cognitionProject\WIN_20231218_20_31_36_Pro.jpg")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    # h,w,image = crop(image)
+    # cv2.imshow("Original", image)
     regions = yolos_proposal(model,image)
     # vision_test()
+    # print(regions)
     img = list(map(lambda region: arrayToImage(region["image"]), regions))
+    # print(img)
+    for image in img:
+        plt.imshow(image)
+        plt.show()
     category = classify(img, PROMPT_SET)
     print(category)
     for i in range(3):
         prompt = PROMPT_SET[i]
         index = category.index(prompt)
-        grasp(pixel_to_coord(regions[index]["x"], regions[index]["y"]))
+        print(regions[index]["x"], regions[index]["y"])
+        a,b = pixel_to_coord(regions[index]["x"], regions[index]["y"])
+        print(a,b)
+        grasp(a,b)
         put_off("left-near")

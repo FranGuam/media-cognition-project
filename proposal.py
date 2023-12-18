@@ -2,7 +2,7 @@ import numpy as np
 import cv2
 # import apriltag
 
-CAMERA_ID = 1
+CAMERA_ID = 0
 GUASSIAN_KERNEL_SIZE = (3, 3)
 CLOSE_KERNEL_SIZE = (3, 3)
 

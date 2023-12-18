@@ -4,7 +4,7 @@ import torch
 import cn_clip.clip as clip
 from cn_clip.clip import load_from_name
 
-CONFIDENCE = 0.75
+CONFIDENCE = 0.5
 
 
 def arrayToImage(array: np.ndarray):
@@ -30,6 +30,7 @@ def classify(images: list[Image.Image], prompts: list[str]):
     ans = []
     for img in images:
         probs = imageTextMatch(img, prompts)
+        print('probs:', probs)
         index = np.where(probs > CONFIDENCE)[1]
         if len(index) > 0:
             ans.append(prompts[index[0]])

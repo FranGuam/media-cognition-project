@@ -36,7 +36,7 @@ ANGLE = {
     "down": [180, 0, 180],
 }
 
-mc = MyCobot('COM3', 115200)
+mc = MyCobot('COM6', 115200)
 
 
 def cmp(pos, target):
