@@ -1,8 +1,18 @@
-from match import arrayToImage, imageTextMatch, classify
+from match import arrayToImage, imageTextMatch, classify, openFromFile
 from proposal import capture, propose
 from robot import init, grasp, put_off
 from audio import recognize
+from yolo_proposal import *
 from matplotlib import pyplot as plt
+
+APPROACH = "yolo"
+BIN_IMAGES = [
+    "./image/gray.jpg",
+    "./image/green.jpg",
+    "./image/red.jpg",
+    "./image/blue.jpg"
+]
+BIN = ["left-near", "left-far", "right-near", "right-far"]
 
 
 def vision_test():
@@ -30,16 +40,28 @@ if __name__ == '__main__':
     plt.imshow(arrayToImage(image))
     plt.show()
     print("==================== Propose Regions ====================")
-    regions = propose(image)
+    if APPROACH == "traditional":
+        regions = propose(image)
+    elif APPROACH == "yolo":
+        model = Detr(lr=2.5e-6, weight_decay=1e-5)
+        model.load_state_dict(torch.load('parameters.pth'))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        regions = yolos_proposal(model, image)
+    else:
+        raise NotImplementedError
     for region in regions:
         plt.imshow(arrayToImage(region["image"]))
         plt.show()
-    print("==================== Classify ====================")
+    print("==================== Judge for object ====================")
     images = list(map(lambda region: arrayToImage(region["image"]), regions))
-    index = classify(prompt, images)
-    print("Index:", index)
-    print("Center:", "X =", regions[index]["x"], ",", "Y =", regions[index]["y"])
+    object_index = classify(prompt, images)
+    print("Index:", object_index)
+    print("Center:", "X =", regions[object_index]["x"], ",", "Y =", regions[object_index]["y"])
+    print("==================== Classify for bins ====================")
+    bins = openFromFile(BIN_IMAGES)
+    bin_index = classify(prompt, bins)
+    print("Bin:", BIN[bin_index], "(", BIN_IMAGES[bin_index], ")")
     print("==================== Grasp and Put ====================")
-    grasp(regions[index]["x"], regions[index]["y"])
-    put_off("left-near")
+    grasp(regions[object_index]["x"], regions[object_index]["y"])
+    put_off(BIN[bin_index])
     init()

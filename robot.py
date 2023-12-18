@@ -8,10 +8,10 @@ import time
 
 BOX_LEVEL = 105
 # BOX_LEVEL = 90
-LEFT_BORDER = 90
-RIGHT_BORDER = -50
-NEAR_BORDER = 70
-FAR_BORDER = 230
+LEFT_BORDER = 80
+RIGHT_BORDER = -70
+NEAR_BORDER = 90
+FAR_BORDER = 235
 
 MODE = 0
 DEFAULT_SPEED = 40
@@ -26,7 +26,7 @@ POSITION = {
          [215, 150, 220, -150, 0, -60]],  # down
     "right-near":
         [[120, -150, 240, -180, 0, 0],  # up
-         [120, -150, 175, -180, 0, 0]],  # down
+         [120, -150, 200, -180, 0, 0]],  # down
     "right-far":
         [[200, -100, 235, -180, 0, 0],  # up
          [220, -140, 220, -150, -10, -80]],  # down
@@ -36,19 +36,20 @@ ANGLE = {
     "down": [180, 0, 180],
 }
 
-mc = MyCobot('COM6', 115200)
+mc = MyCobot('COM3', 115200)
 
 
-def cmp(pos, target):
+def cmp(pos, target, quite=False):
     if len(pos) == 0:
         return 999
     delta_x = abs(pos[0] - target[0])
     delta_y = abs(pos[1] - target[1])
     delta_z = abs(pos[2] - target[2])
     delta = (delta_x ** 2 + delta_y ** 2 + delta_z ** 2) ** 0.5
-    print("Position:", pos)
-    print("Delta:", delta)
-    print("-------------------------")
+    if not quite:
+        print("Position:", pos)
+        print("Delta:", delta)
+        print("-------------------------")
     return delta
 
 
@@ -65,12 +66,10 @@ def move(x, y, z, *args, **kwargs):
     else:
         speed = DEFAULT_SPEED
     mc.send_coords(coords, speed, MODE)
-    start = time.time()
     while cmp(mc.get_coords(), (x, y, z)) > TARGET_DELTA:
-        if cmp(mc.get_coords(), (x, y, z)) == 999:
+        if cmp(mc.get_coords(), (x, y, z), quite=True) == 999:
             time.sleep(2)
             break
-        assert time.time() - start < 3
         time.sleep(0.1)
     time.sleep(0.5)
     return

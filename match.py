@@ -5,6 +5,10 @@ import cn_clip.clip as clip
 from cn_clip.clip import load_from_name
 
 
+def openFromFile(paths: list[str]):
+    return list(map(lambda path: Image.open(path), paths))
+
+
 def arrayToImage(array: np.ndarray):
     return Image.fromarray(array)
     # 假设 array 是一个形状为(3, H, W)的numpy数组

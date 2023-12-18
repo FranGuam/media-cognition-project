@@ -150,7 +150,7 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
     draw = ImageDraw.Draw(image_copy)
 
     font_size = 16
-    font = ImageFont.load_default().font_variant(size=font_size)
+    # font = ImageFont.load_default().font_variant(size=font_size)
 
     for  box in boxes:
         # 取整并转换为整数
