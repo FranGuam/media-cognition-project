@@ -189,7 +189,7 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
 
 import cv2
 import matplotlib.pyplot as plt
-from proposal import crop
+from proposal_traditional import crop
 
 if __name__ == "__main__":
     model = Detr(lr=2.5e-6, weight_decay=1e-5)

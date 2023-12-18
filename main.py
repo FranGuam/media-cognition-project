@@ -1,8 +1,8 @@
-from match import arrayToImage, imageTextMatch, classify, openFromFile
-from proposal import capture, propose
-from robot import init, grasp, put_off
 from audio import recognize
-from yolo_proposal import *
+from proposal_traditional import capture, propose
+from proposal_yolo import *
+from match import arrayToImage, imageTextMatch, classify, openFromFile
+from robot import init, grasp, put_off
 from matplotlib import pyplot as plt
 
 APPROACH = "yolo"
