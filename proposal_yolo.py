@@ -182,7 +182,13 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
             img_cv = numpy.array(img)
             # cv2.imshow("crop", img_cv)
             print(center_x/width,center_y/height)
-            regions.append({"x": center_x/width, "y": center_y/height, "image": img_cv})
+            regions.append({
+                "x": center_x/width,
+                "y": center_y/height,
+                "corner_x": (box[0] - MIN_X) / width,
+                "corner_y": (box[1] - MIN_Y) / height,
+                "image": img_cv
+            })
             print(center_x/width,center_y/height)
     
     return regions

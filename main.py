@@ -1,11 +1,11 @@
 from audio import recognize
-from proposal_traditional import capture, propose
+from proposal_traditional import crop, capture, propose, refine
 from proposal_yolo import *
 from match import arrayToImage, imageTextMatch, classify, openFromFile
 from robot import init, grasp, put_off
 from matplotlib import pyplot as plt
 
-APPROACH = "yolo"
+APPROACH = "yolo+traditional"
 BIN_IMAGES = [
     "./image/gray.jpg",
     "./image/green.jpg",
@@ -30,7 +30,7 @@ def vision_test():
 
 
 if __name__ == '__main__':
-    print("==================== Start ====================")
+    print("==================== Initializing ====================")
     init()
     print("==================== Voice to Text ====================")
     prompt = recognize()
@@ -41,12 +41,20 @@ if __name__ == '__main__':
     plt.show()
     print("==================== Propose Regions ====================")
     if APPROACH == "traditional":
+        image = crop(image)
         regions = propose(image)
     elif APPROACH == "yolo":
         model = Detr(lr=2.5e-6, weight_decay=1e-5)
         model.load_state_dict(torch.load('parameters.pth'))
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         regions = yolos_proposal(model, image)
+    elif APPROACH == "yolo+traditional":
+        model = Detr(lr=2.5e-6, weight_decay=1e-5)
+        model.load_state_dict(torch.load('parameters.pth'))
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        regions = yolos_proposal(model, image)
+        print("==================== Refine Regions ====================")
+        regions = refine(regions)
     else:
         raise NotImplementedError
     for region in regions:

@@ -64,8 +64,9 @@ def apriltag(image):
 
 
 def crop(image):
+    # TODO: Crop using apriltag
     x, y, w, h = 792, 536, 502, 506
-    return h, w, image[y:y + h, x:x + w]
+    return image[y:y + h, x:x + w]
 
 
 def prepare(image):
@@ -113,17 +114,32 @@ def center(contour):
 
 
 def propose(image):
-    h, w, image = crop(image)
+    h, w, _ = image.shape
     canny = prepare(image)
     contours, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     ans = []
     for contour in contours:
         x, y = center(contour)
         _x, _y, _w, _h = cv2.boundingRect(contour)
+        # TODO: Update this value
         if _w > 50 and _h > 50:
             img = cv2.cvtColor(image[_y:_y + _h, _x:_x + _w], cv2.COLOR_BGR2RGB)
             ans.append({"x": x / w, "y": y / h, "image": img})
     return ans
+
+
+def refine(regions):
+    for region in regions:
+        image = region["image"].copy()
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        regs = propose(image)
+        if len(regs) != 1:
+            continue
+        reg = regs[0]
+        region["x"] = 2 * region["x"] * reg["x"] + (1 - 2 * reg["x"]) * region["corner_x"]
+        region["y"] = 2 * region["y"] * reg["y"] + (1 - 2 * reg["y"]) * region["corner_y"]
+        region["image"] = reg["image"]
+    return regions
 
 
 if __name__ == '__main__':
