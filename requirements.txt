@@ -1,0 +1,11 @@
+matplotlib~=3.7.2
+SpeechRecognition~=3.10.1
+pyaudio~=0.2.11
+numpy~=1.26.0
+torch~=2.1.0
+torchvision~=0.16.0
+cn_clip~=1.5.1
+opencv-python~=4.8.1.78
+pymycobot~=3.3.2
+pytorch-lightning~=2.1.2
+transformers~=4.36.1
