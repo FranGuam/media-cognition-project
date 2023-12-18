@@ -4,11 +4,7 @@ import torch
 import cn_clip.clip as clip
 from cn_clip.clip import load_from_name
 
-<<<<<<< HEAD
 # CONFIDENCE = 0.75
-=======
-CONFIDENCE = 0.5
->>>>>>> 58b1f1e7b04942b19c0962b0bde52ff8659f5f64
 
 
 def arrayToImage(array: np.ndarray):
