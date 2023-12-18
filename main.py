@@ -3,13 +3,7 @@ from proposal import capture, propose
 from robot import init, grasp, put_off
 from matplotlib import pyplot as plt
 
-PROMPT_SET = [
-    "an apple",
-    "a camera",
-    "a gun",
-    "a ball",
-    "a cat",
-]
+prompt = "an apple"
 
 
 def vision_test():
@@ -31,11 +25,7 @@ if __name__ == '__main__':
     image = capture()
     regions = propose(image)
     # vision_test()
-    img = list(map(lambda region: arrayToImage(region["image"]), regions))
-    category = classify(img, PROMPT_SET)
-    print(category)
-    for i in range(3):
-        prompt = PROMPT_SET[i]
-        index = category.index(prompt)
-        grasp(regions[index]["x"], regions[index]["y"])
-        put_off("left-near")
+    imgs = list(map(lambda region: arrayToImage(region["image"]), regions))
+    index = classify(prompt, imgs)
+    grasp(regions[index]["x"], regions[index]["y"])
+    put_off("left-near")
