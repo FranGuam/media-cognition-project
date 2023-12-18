@@ -42,3 +42,4 @@ if __name__ == '__main__':
     print("==================== Grasp and Put ====================")
     grasp(regions[index]["x"], regions[index]["y"])
     put_off("left-near")
+    init()

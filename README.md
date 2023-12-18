@@ -47,8 +47,16 @@ Class project for Media and Cognition 2023 Fall
   lmdb==1.3.0
   torch>=1.7.1
   torchvision
-  
   cn_clip
   ```
 
 - 接口函数 `TextMatchImages`，计算给定的text与每张图片的匹配概率。
+
+### Yolo
+
+- 环境配置
+  ```
+  pytorch_lightning
+  transformers
+  ```
+- 接口函数 `yolo_proposal`，给定模型和图片，返回regions。
