@@ -18,9 +18,9 @@ def callback_google(r, audio):
     try:
         return r.recognize_google(audio, language="zh-CN")
     except sr.UnknownValueError:
-        print("Oops! Didn't catch that")
+        print("Google Speech Recognition 无法理解你的语音")
     except sr.RequestError as e:
-        print("Uh oh! Couldn't request results from Google Speech Recognition service; {0}".format(e))
+        print("无法从 Google Speech Recognition 获取结果; {0}".format(e))
 
 
 def callback_sphinx(r, audio):
