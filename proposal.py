@@ -9,6 +9,11 @@ CLOSE_KERNEL_SIZE = (3, 3)
 
 def capture():
     cap = cv2.VideoCapture(CAMERA_ID)
+    if not cap.isOpened():
+        print("Cannot open camera")
+        exit()
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
     ret, frame = cap.read()
     while not ret:
         ret, frame = cap.read()
@@ -59,7 +64,7 @@ def apriltag(image):
 
 
 def crop(image):
-    x, y, w, h = 240, 240, 220, 220
+    x, y, w, h = 792, 536, 502, 506
     return h, w, image[y:y + h, x:x + w]
 
 
