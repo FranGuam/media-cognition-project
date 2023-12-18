@@ -10,7 +10,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 print(device)
 model, preprocess = load_from_name("ViT-B-16", device=device, download_root='./')
 model.eval()
-image = preprocess(Image.open("wlop.png")).unsqueeze(0).to(device)
+image = preprocess(Image.open("../wlop.png")).unsqueeze(0).to(device)
 text = clip.tokenize(["girl", "笔", "海琴烟"]).to(device)
 
 with torch.no_grad():
