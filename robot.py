@@ -6,11 +6,11 @@ import time
 # NEAR = 135
 # FAR = 215
 
-# BOX_LEVEL = 105
-BOX_LEVEL = 90
+BOX_LEVEL = 105
+# BOX_LEVEL = 90
 LEFT_BORDER = 90
-RIGHT_BORDER = -60
-NEAR_BORDER = 90
+RIGHT_BORDER = -50
+NEAR_BORDER = 70
 FAR_BORDER = 230
 
 MODE = 0
@@ -109,7 +109,8 @@ def grasp(pixel_x, pixel_y):
     move(x, y, BOX_LEVEL + 30)
     move(x, y, BOX_LEVEL, speed=10)
     pump_on()
-    move(x, y, BOX_LEVEL + 150)
+    move(x, y, BOX_LEVEL + 50)
+    move(150, 0, 240)
     return
 
 
