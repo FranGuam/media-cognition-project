@@ -38,7 +38,6 @@ def main():
     if prompt is None:
         prompt = DEFAULT_PROMPT
     print("Prompt:", prompt)
-    prompt = "a shoe, green bin"
     print("==================== Capture Photo ====================")
     image = capture()
     arrayToImage(image).show("Original")
