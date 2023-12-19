@@ -1,8 +1,13 @@
 import numpy as np
 import cv2
-# import apriltag
+import pupil_apriltags as apriltag  # for windows
+# import apriltag  # for linux
 
 CAMERA_ID = 0
+TAG_LEFT_NEAR = 0
+TAG_RIGHT_FAR = 0
+TAG_LEFT_FAR = 2
+TAG_RIGHT_NEAR = 2
 GUASSIAN_KERNEL_SIZE = (3, 3)
 CLOSE_KERNEL_SIZE = (3, 3)
 
@@ -21,52 +26,71 @@ def capture():
     return frame
 
 
-def apriltag(image):
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    options = apriltag.DetectorOptions(families="tag36h11")
-    detector = apriltag.Detector(options)
-    results = detector.detect(gray)
-    for result in results:
-        # Get the tag ID and the corners
-        tag_id = result.tag_id
-        corners = result.corners
-
-        # Define the tag size (in meters)
-        tag_size = 0.1
-
-        # Define the 3D coordinates of the tag corners in the world frame
-        obj_pts = np.array([
-            [-tag_size / 2, -tag_size / 2, 0],
-            [tag_size / 2, -tag_size / 2, 0],
-            [tag_size / 2, tag_size / 2, 0],
-            [-tag_size / 2, tag_size / 2, 0]
-        ])
-
-        # Reshape the 2D coordinates of the tag corners in the image frame
-        img_pts = corners.reshape(4, 2)
-
-        # Define the camera matrix (fx, fy, cx, cy) and the distortion coefficients
-        # You can obtain these values by calibrating your camera
-        camera_matrix = np.array([
-            [800, 0, 320],
-            [0, 800, 240],
-            [0, 0, 1]
-        ])
-        dist_coeffs = np.array([0, 0, 0, 0])
-
-        # Solve for the pose of the tag in the camera frame
-        _, rvec, tvec = cv2.solvePnP(obj_pts, img_pts, camera_matrix, dist_coeffs)
-
-        # Print the tag ID and the position
-        print(f"Tag ID: {tag_id}")
-        print(f"Position: {tvec.ravel()}")
-    return results
+def detect(image):
+    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag36h11"))  # for linux
+    detector = apriltag.Detector(families="tag36h11")  # for windows
+    tags = detector.detect(image_gray)
+    result = {}
+    # image_detect = image.copy()
+    for tag in tags:
+        # cv2.polylines(image_detect, [np.array(tag.corners, np.int32)], True, (0, 255, 0), 2)
+        # cv2.putText(image_detect, str(tag.tag_id), np.array(tag.corners[0], np.int32), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        # cv2.imshow("Detect", image_detect)
+        if tag.tag_id == TAG_LEFT_NEAR:
+            result["x_min"] = round(min(tag.corners[:, 0]))
+            result["y_max"] = round(max(tag.corners[:, 1]))
+        elif tag.tag_id == TAG_RIGHT_FAR:
+            result["x_max"] = round(max(tag.corners[:, 0]))
+            result["y_min"] = round(min(tag.corners[:, 1]))
+        elif tag.tag_id == TAG_LEFT_FAR:
+            result["x_min"] = round(min(tag.corners[:, 0]))
+            result["y_min"] = round(min(tag.corners[:, 1]))
+        elif tag.tag_id == TAG_RIGHT_NEAR:
+            result["x_max"] = round(max(tag.corners[:, 0]))
+            result["y_max"] = round(max(tag.corners[:, 1]))
+        else:
+            print("Unknown tag ID:", tag.tag_id)
+            print("Tag corners:", tag.corners)
+    return result
 
 
 def crop(image):
     # TODO: Crop using apriltag
-    x, y, w, h = 792, 536, 502, 506
-    return image[y:y + h, x:x + w]
+    # x, y, w, h = 792, 536, 502, 506
+    # return image[y:y + h, x:x + w]
+    result = detect(image)
+    return image[result["y_min"]:result["y_max"], result["x_min"]:result["x_max"]]
+
+
+def motion(image):
+    corners = detect(image)
+    # Define the tag size (in meters)
+    tag_size = 0.1
+
+    # Define the 3D coordinates of the tag corners in the world frame
+    obj_pts = np.array([
+        [-tag_size / 2, -tag_size / 2, 0],
+        [tag_size / 2, -tag_size / 2, 0],
+        [tag_size / 2, tag_size / 2, 0],
+        [-tag_size / 2, tag_size / 2, 0]
+    ])
+
+    # Reshape the 2D coordinates of the tag corners in the image frame
+    img_pts = corners.reshape(4, 2)
+
+    # Define the camera matrix (fx, fy, cx, cy) and the distortion coefficients
+    # You can obtain these values by calibrating your camera
+    camera_matrix = np.array([
+        [800, 0, 320],
+        [0, 800, 240],
+        [0, 0, 1]
+    ])
+    dist_coeffs = np.array([0, 0, 0, 0])
+
+    # Solve for the pose of the tag in the camera frame
+    _, rvec, tvec = cv2.solvePnP(obj_pts, img_pts, camera_matrix, dist_coeffs)
+    return rvec, tvec
 
 
 def prepare(image):
@@ -144,7 +168,7 @@ def refine(regions):
 
 if __name__ == '__main__':
     image = capture()
-    _, _, image = crop(image)
+    image = crop(image)
     cv2.imshow("Original", image)
     canny = prepare(image)
     cv2.imshow("Canny", canny)
