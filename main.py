@@ -1,11 +1,14 @@
+import keyboard
+from matplotlib import pyplot as plt
+
 from audio import recognize
 from proposal_traditional import crop, capture, propose, refine
 from proposal_yolo import *
 from match import arrayToImage, imageTextMatch, classify, openFromFile
 from robot import init, grasp, put_off
-from matplotlib import pyplot as plt
 
 APPROACH = "yolo+traditional"
+DEFAULT_PROMPT = "Put an apple into the green bin"
 BIN_IMAGES = [
     "./image/gray.jpg",
     "./image/green.jpg",
@@ -29,29 +32,29 @@ def vision_test():
     return
 
 
-if __name__ == '__main__':
-    print("==================== Initializing ====================")
-    init()
+def main():
     print("==================== Voice to Text ====================")
     prompt = recognize()
+    if prompt is None:
+        prompt = DEFAULT_PROMPT
     print("Prompt:", prompt)
+    prompt = "a shoe, green bin"
     print("==================== Capture Photo ====================")
     image = capture()
-    plt.imshow(arrayToImage(image))
-    plt.show()
+    arrayToImage(image).show("Original")
     print("==================== Propose Regions ====================")
     if APPROACH == "traditional":
         image = crop(image)
+        plt.imshow(arrayToImage(image))
+        plt.show()
         regions = propose(image)
     elif APPROACH == "yolo":
         model = Detr(lr=2.5e-6, weight_decay=1e-5)
         model.load_state_dict(torch.load('parameters.pth'))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         regions = yolos_proposal(model, image)
     elif APPROACH == "yolo+traditional":
         model = Detr(lr=2.5e-6, weight_decay=1e-5)
         model.load_state_dict(torch.load('parameters.pth'))
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         regions = yolos_proposal(model, image)
         print("==================== Refine Regions ====================")
         regions = refine(regions)
@@ -73,3 +76,12 @@ if __name__ == '__main__':
     grasp(regions[object_index]["x"], regions[object_index]["y"])
     put_off(BIN[bin_index])
     init()
+    print("Press Enter to restart / Press Esc to exit ...")
+
+
+if __name__ == '__main__':
+    print("==================== Initializing ====================")
+    init()
+    print("Press Enter to start ...")
+    keyboard.add_hotkey('enter', main)
+    keyboard.wait('esc')

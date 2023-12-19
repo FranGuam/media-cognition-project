@@ -12,3 +12,4 @@ transformers~=4.36.1
 # apriltag~=0.0.16  # for linux
 pupil_apriltags~=1.0.4  # for windows
 pillow~=10.1.0
+keyboard~=0.13.5

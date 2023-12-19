@@ -16,24 +16,30 @@ FAR_BORDER = 235
 MODE = 0
 DEFAULT_SPEED = 40
 TARGET_DELTA = 20
+MAX_FAIL_TIME = 3
+MAX_WAIT_TIME = 9
 
 POSITION = {
+    "center":
+        [[150, 0, 240, -180, 0, 0],  # up
+         [150, 0, 175, -180, 0, 0]],  # down
     "left-near":
         [[120, 170, 240, -180, 0, 0],  # up
          [120, 170, 175, -180, 0, 0]],  # down
     "left-far":
-        [[200, 120, 230, -180, 0, 0],  # up
+        [[200, 110, 240, -180, 0, 0],  # up
          [215, 150, 220, -150, 0, -60]],  # down
     "right-near":
         [[120, -150, 240, -180, 0, 0],  # up
-         [120, -150, 200, -180, 0, 0]],  # down
+         [120, -150, 175, -180, 0, 0]],  # down
     "right-far":
-        [[200, -100, 235, -180, 0, 0],  # up
+        [[200, -100, 240, -180, 0, 0],  # up
          [220, -140, 220, -150, -10, -80]],  # down
 }
 
 ANGLE = {
     "down": [180, 0, 180],
+    "forward": [-90, 0, -90],
 }
 
 mc = MyCobot('COM3', 115200)
@@ -66,10 +72,15 @@ def move(x, y, z, *args, **kwargs):
     else:
         speed = DEFAULT_SPEED
     mc.send_coords(coords, speed, MODE)
+    start = time.time()
     while cmp(mc.get_coords(), (x, y, z)) > TARGET_DELTA:
         if cmp(mc.get_coords(), (x, y, z), quite=True) == 999:
             time.sleep(2)
             break
+        if time.time() - start > MAX_WAIT_TIME:
+            break
+        if time.time() - start > MAX_FAIL_TIME:
+            mc.send_coords(coords, speed, MODE)
         time.sleep(0.1)
     time.sleep(0.5)
     return
@@ -91,8 +102,8 @@ def pump_off():
 
 def init():
     pump_off()
+    move(50, -60, 400, *ANGLE["forward"])
     mc.send_angles([0, 0, 0, 0, 0, 0], 40)
-    time.sleep(3)
     return
 
 
@@ -109,7 +120,7 @@ def grasp(pixel_x, pixel_y):
     move(x, y, BOX_LEVEL, speed=10)
     pump_on()
     move(x, y, BOX_LEVEL + 50)
-    move(150, 0, 240)
+    move(*(POSITION["center"][0]))
     return
 
 

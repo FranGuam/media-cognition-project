@@ -17,7 +17,7 @@ def arrayToImage(array: np.ndarray):
 
 def imageTextMatch(image: Image.Image, text: list[str]):
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(device)
+    print("Using", device)
     model, preprocess = load_from_name("ViT-B-16", device=device, download_root='./')
     model.eval()
     text = clip.tokenize(text).to(device)

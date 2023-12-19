@@ -10,24 +10,36 @@ TAG_LEFT_FAR = 2
 TAG_RIGHT_NEAR = 2
 GUASSIAN_KERNEL_SIZE = (3, 3)
 CLOSE_KERNEL_SIZE = (3, 3)
+BOX_MIN_WIDTH = 120
+BOX_MIN_HEIGHT = 120
 
+
+def show(caption, image):
+    img = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    cv2.imshow(caption, img)
+    
 
 def capture():
     cap = cv2.VideoCapture(CAMERA_ID)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
+    print("Adjusting resolution")
+    # This is time-consuming
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+    print("Capture image")
     ret, frame = cap.read()
     while not ret:
         ret, frame = cap.read()
+    print("Capture success")
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     cap.release()
     return frame
 
 
 def detect(image):
-    image_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag36h11"))  # for linux
     detector = apriltag.Detector(families="tag36h11")  # for windows
     tags = detector.detect(image_gray)
@@ -36,7 +48,6 @@ def detect(image):
     for tag in tags:
         # cv2.polylines(image_detect, [np.array(tag.corners, np.int32)], True, (0, 255, 0), 2)
         # cv2.putText(image_detect, str(tag.tag_id), np.array(tag.corners[0], np.int32), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-        # cv2.imshow("Detect", image_detect)
         if tag.tag_id == TAG_LEFT_NEAR:
             result["x_min"] = round(min(tag.corners[:, 0]))
             result["y_max"] = round(max(tag.corners[:, 1]))
@@ -52,13 +63,19 @@ def detect(image):
         else:
             print("Unknown tag ID:", tag.tag_id)
             print("Tag corners:", tag.corners)
+    # show("Detect", image_detect)
+    if "x_min" not in result:
+        result["x_min"] = 792
+    if "x_max" not in result:
+        result["x_max"] = 1294
+    if "y_min" not in result:
+        result["y_min"] = 536
+    if "y_max" not in result:
+        result["y_max"] = 1042
     return result
 
 
 def crop(image):
-    # TODO: Crop using apriltag
-    # x, y, w, h = 792, 536, 502, 506
-    # return image[y:y + h, x:x + w]
     result = detect(image)
     return image[result["y_min"]:result["y_max"], result["x_min"]:result["x_max"]]
 
@@ -98,7 +115,7 @@ def prepare(image):
     image_guass = cv2.GaussianBlur(image, GUASSIAN_KERNEL_SIZE, 0)
 
     # 取灰度图
-    image_gray = cv2.cvtColor(image_guass, cv2.COLOR_BGR2GRAY)
+    image_gray = cv2.cvtColor(image_guass, cv2.COLOR_RGB2GRAY)
 
     # Canny边缘检测
     image_canny = cv2.Canny(image_gray, 50, 150)
@@ -111,12 +128,10 @@ def prepare(image):
     # image_canny_erode = cv2.erode(image_canny, kernel, iterations=1)
     # image_canny_dilate = cv2.dilate(image_canny, kernel, iterations=1)
 
-    # cv2.imshow("Gray", image_gray)
-    # cv2.imshow("Canny", image_canny)
-    # cv2.imshow("Open", image_canny_open)
-    # cv2.imshow("Close", image_canny_close)
-    # cv2.imshow("Erode", image_canny_erode)
-    # cv2.imshow("Dilate", image_canny_dilate)
+    # show("Guass", image_guass)
+    # show("Gray", image_gray)
+    # show("Canny", image_canny)
+    # show("Close", image_canny_close)
 
     return image_canny_close
 
@@ -145,19 +160,16 @@ def propose(image):
     for contour in contours:
         x, y = center(contour)
         _x, _y, _w, _h = cv2.boundingRect(contour)
-        # TODO: Update this value
-        if _w > 50 and _h > 50:
-            img = cv2.cvtColor(image[_y:_y + _h, _x:_x + _w], cv2.COLOR_BGR2RGB)
-            ans.append({"x": x / w, "y": y / h, "image": img})
+        if _w > BOX_MIN_WIDTH and _h > BOX_MIN_HEIGHT:
+            ans.append({"x": x / w, "y": y / h, "image": image[_y:_y + _h, _x:_x + _w]})
     return ans
 
 
 def refine(regions):
-    for region in regions:
-        image = region["image"].copy()
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-        regs = propose(image)
+    for i, region in enumerate(regions):
+        regs = propose(region["image"])
         if len(regs) != 1:
+            print("Refine failed for region", i, ". Detected", len(regs), "regions.")
             continue
         reg = regs[0]
         region["x"] = 2 * region["x"] * reg["x"] + (1 - 2 * reg["x"]) * region["corner_x"]
@@ -168,23 +180,24 @@ def refine(regions):
 
 if __name__ == '__main__':
     image = capture()
+    show("Original", image)
     image = crop(image)
-    cv2.imshow("Original", image)
+    show("Crop", image)
     canny = prepare(image)
-    cv2.imshow("Canny", canny)
+    show("Canny", canny)
 
     contours, hierarchy = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     image_contours = image.copy()
     cv2.drawContours(image_contours, contours, -1, (0, 0, 255), 1)
-    cv2.imshow("Contours", image_contours)
+    show("Contours", image_contours)
 
     for contour in contours:
         x, y = center(contour)
         cv2.circle(image, (x, y), 3, (0, 255, 0), -1)
         x, y, w, h = cv2.boundingRect(contour)
-        if w > 50 and h > 50:
+        if w > BOX_MIN_WIDTH and h > BOX_MIN_HEIGHT:
             cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cv2.imshow("Result", image)
+    show("Result", image)
 
     # # 以以上结果作为掩码图，对原图进行操作，获取全部的封闭区域
     # mask = image_canny_close.copy()
