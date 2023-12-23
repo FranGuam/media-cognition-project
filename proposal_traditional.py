@@ -41,7 +41,7 @@ def capture():
 def detect(image):
     image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
     # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag36h11"))  # for linux
-    detector = apriltag.Detector(families="tag36h11")  # for windows
+    detector = apriltag.Detector(families="tag16h5")  # for windows
     tags = detector.detect(image_gray)
     result = {}
     # image_detect = image.copy()
