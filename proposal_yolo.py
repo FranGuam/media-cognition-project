@@ -6,6 +6,7 @@ from PIL import Image
 import torch
 import numpy
 import torch
+import pupil_apriltags as apriltag
 
 MIN_X = 750
 MIN_Y = 520
@@ -101,10 +102,31 @@ def new_box(box1, box2):
     return torch.FloatTensor([x1_intersection, y1_intersection, x2_intersection, y2_intersection])
 
 
+
+def detect(image):
+    '''
+    return minx, miny, height, width
+    '''
+    image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag36h11"))  # for linux
+    detector = apriltag.Detector(families="tag16h5")  # for windows
+    tags = detector.detect(image_gray)
+    if(len(tags) < 2):
+        # if not detected, return default value
+        return MIN_X,MIN_Y,550, image.size[1] - MIN_Y
+    corners = numpy.array([tag.corners for tag in tags])
+    min_x = min(corners[:,0])
+    max_x = max(corners[:,0])
+    min_y = min(corners[:,1])
+    max_y = max(corners[:,1])
+    return min_x,min_y,max_x-min_x,max_y-min_y
+
+
 from PIL import Image, ImageDraw, ImageFont
     
 def yolos_proposal(model, ori_image : numpy.ndarray):
 
+    min_x, min_y, width, height = detect(ori_image)
     image = Image.fromarray(ori_image)
 
 
@@ -165,16 +187,16 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
     
     # 裁剪出propose的区域， 返回值是一个list，每个元素是一个字典，包含x,y,image
     regions = []
-    width = 550
-    print(image.size)
-    height = image.size[1] - MIN_Y
+    # width = 550
+    # print(image.size)
+    # height = image.size[1] - MIN_Y
     for box in boxes:
         # 取整并转换为整数
         box = [round(i, 2) for i in box.tolist()]
         box = [int(i) for i in box]
-        center_x = (box[0] + box[2]) / 2 - MIN_X
+        center_x = (box[0] + box[2]) / 2 - min_x
         center_x = int(center_x)
-        center_y = (box[1] + box[3]) / 2 - MIN_Y
+        center_y = (box[1] + box[3]) / 2 - min_y
         center_y = int(center_y)
 
         if 1:
@@ -185,8 +207,8 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
             regions.append({
                 "x": center_x/width,
                 "y": center_y/height,
-                "corner_x": (box[0] - MIN_X) / width,
-                "corner_y": (box[1] - MIN_Y) / height,
+                "corner_x": (box[0] - min_x) / width,
+                "corner_y": (box[1] - min_y) / height,
                 "image": img_cv
             })
             print(center_x/width,center_y/height)
@@ -195,7 +217,6 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
 
 import cv2
 import matplotlib.pyplot as plt
-from proposal_traditional import crop
 
 if __name__ == "__main__":
     model = Detr(lr=2.5e-6, weight_decay=1e-5)
