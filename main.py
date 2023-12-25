@@ -1,3 +1,4 @@
+import threading
 import keyboard
 from matplotlib import pyplot as plt
 
@@ -74,13 +75,15 @@ def main():
     print("==================== Grasp and Put ====================")
     grasp(regions[object_index]["x"], regions[object_index]["y"])
     put_off(BIN[bin_index])
-    init()
+    threading.Thread(target=init).start()
     print("Press Enter to restart / Press Esc to exit ...")
 
 
 if __name__ == '__main__':
     print("==================== Initializing ====================")
-    init()
+    threading.Thread(target=init).start()
     print("Press Enter to start ...")
-    keyboard.add_hotkey('enter', main)
+    thread = threading.Thread(target=main, name="main", daemon=True)
+    keyboard.add_hotkey('enter', thread.start)
     keyboard.wait('esc')
+    print("Exiting ...")
