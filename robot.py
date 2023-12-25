@@ -14,8 +14,8 @@ NEAR_BORDER = 90
 FAR_BORDER = 235
 
 MODE = 0
-DEFAULT_SPEED = 40
-TARGET_DELTA = 20
+DEFAULT_SPEED = 80
+TARGET_DELTA = 15
 MAX_FAIL_TIME = 3
 MAX_WAIT_TIME = 9
 
@@ -89,14 +89,12 @@ def move(x, y, z, *args, **kwargs):
 def pump_on():
     mc.set_basic_output(2, 0)
     mc.set_basic_output(5, 0)
-    time.sleep(2)
     return
 
 
 def pump_off():
     mc.set_basic_output(2, 1)
     mc.set_basic_output(5, 1)
-    time.sleep(4)
     return
 
 
@@ -117,8 +115,8 @@ def grasp(pixel_x, pixel_y):
     init()
     x, y = pixel_to_coord(pixel_x, pixel_y)
     move(x, y, BOX_LEVEL + 30)
-    move(x, y, BOX_LEVEL, speed=10)
     pump_on()
+    move(x, y, BOX_LEVEL, speed=20)
     move(x, y, BOX_LEVEL + 50)
     move(*(POSITION["center"][0]))
     return
@@ -128,6 +126,7 @@ def put_off(label):
     move(*(POSITION[label][0]))
     move(*(POSITION[label][1]))
     pump_off()
+    time.sleep(4)
     move(*(POSITION[label][0]))
     return
 
