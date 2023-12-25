@@ -8,8 +8,8 @@ import numpy
 import torch
 import pupil_apriltags as apriltag
 
-MIN_X = 750
-MIN_Y = 520
+MIN_X = 770
+MIN_Y = 540
 
 
 class Detr(pl.LightningModule):
@@ -126,7 +126,7 @@ from PIL import Image, ImageDraw, ImageFont
     
 def yolos_proposal(model, ori_image : numpy.ndarray):
 
-    min_x, min_y, width, height = detect(ori_image)
+    min_x, min_y, width, height = MIN_X,MIN_Y,550, 520
     image = Image.fromarray(ori_image)
 
 
@@ -222,7 +222,7 @@ if __name__ == "__main__":
     model = Detr(lr=2.5e-6, weight_decay=1e-5)
     model.load_state_dict(torch.load('parameters.pth'))         # Read the parameters prepared already
 
-    image = cv2.imread("D:\code\media_cognitionProject\WIN_20231218_19_54_26_Pro.jpg")
+    image = cv2.imread("E:\Resources\media-cognition-project\image\whole.jpg")
     #h,w,image = crop(image)
     plt.figure()
     plt.imshow(image)
