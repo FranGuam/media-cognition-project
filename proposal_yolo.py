@@ -8,8 +8,14 @@ import numpy
 import torch
 import pupil_apriltags as apriltag
 
-MIN_X = 770
+# MIN_X = 780
+# MIN_Y = 540
+# W = 520
+# H = 490
+MIN_X = 792
 MIN_Y = 540
+W = 502
+H = 506
 
 
 class Detr(pl.LightningModule):
@@ -126,7 +132,7 @@ from PIL import Image, ImageDraw, ImageFont
     
 def yolos_proposal(model, ori_image : numpy.ndarray):
 
-    min_x, min_y, width, height = MIN_X,MIN_Y,550, 520
+    min_x, min_y, width, height = MIN_X,MIN_Y,W, H
     image = Image.fromarray(ori_image)
 
 
@@ -203,7 +209,7 @@ def yolos_proposal(model, ori_image : numpy.ndarray):
             img = image.crop(box)
             img_cv = numpy.array(img)
             # cv2.imshow("crop", img_cv)
-            print(center_x/width,center_y/height)
+            print(box)
             regions.append({
                 "x": center_x/width,
                 "y": center_y/height,
