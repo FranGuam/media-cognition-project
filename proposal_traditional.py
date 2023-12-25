@@ -4,10 +4,10 @@ import pupil_apriltags as apriltag  # for windows
 # import apriltag  # for linux
 
 CAMERA_ID = 0
-TAG_LEFT_NEAR = 0
-TAG_RIGHT_FAR = 0
-TAG_LEFT_FAR = 2
-TAG_RIGHT_NEAR = 2
+TAG_LEFT_NEAR = -1
+TAG_RIGHT_FAR = -1
+TAG_LEFT_FAR = -1
+TAG_RIGHT_NEAR = -1
 GUASSIAN_KERNEL_SIZE = (3, 3)
 CLOSE_KERNEL_SIZE = (3, 3)
 BOX_MIN_WIDTH = 120
