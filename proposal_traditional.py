@@ -40,14 +40,22 @@ def capture():
 
 def detect(image):
     image_gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
-    # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag36h11"))  # for linux
+    # detector = apriltag.Detector(apriltag.DetectorOptions(families="tag16h5"))  # for linux
     detector = apriltag.Detector(families="tag16h5")  # for windows
     tags = detector.detect(image_gray)
-    result = {}
+
     # image_detect = image.copy()
+    # for tag in tags:
+    #     cv2.polylines(image_detect, [np.array(tag.corners, np.int32)], True, (0, 255, 0), 2)
+    #     cv2.putText(image_detect, str(tag.tag_id), np.array(tag.corners[0], np.int32), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    # show("Detect", image_detect)
+    return tags
+
+
+def crop(image):
+    result = {}
+    tags = detect(image)
     for tag in tags:
-        # cv2.polylines(image_detect, [np.array(tag.corners, np.int32)], True, (0, 255, 0), 2)
-        # cv2.putText(image_detect, str(tag.tag_id), np.array(tag.corners[0], np.int32), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
         if tag.tag_id == TAG_LEFT_NEAR:
             result["x_min"] = round(min(tag.corners[:, 0]))
             result["y_max"] = round(max(tag.corners[:, 1]))
@@ -63,7 +71,6 @@ def detect(image):
         else:
             print("Unknown tag ID:", tag.tag_id)
             print("Tag corners:", tag.corners)
-    # show("Detect", image_detect)
     if "x_min" not in result:
         result["x_min"] = 792
     if "x_max" not in result:
@@ -72,11 +79,6 @@ def detect(image):
         result["y_min"] = 536
     if "y_max" not in result:
         result["y_max"] = 1042
-    return result
-
-
-def crop(image):
-    result = detect(image)
     return image[result["y_min"]:result["y_max"], result["x_min"]:result["x_max"]]
 
 
